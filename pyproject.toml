@@ -1,0 +1,144 @@
+# Copyright (C) 2026 FORKTEX S.R.L.
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-ForkTex-Commercial
+#
+# This file is part of ForkTex FSD.
+#
+# For commercial licensing -- including use in proprietary products, SaaS
+# deployments, or any context where AGPL obligations cannot be met -- you
+# MUST obtain a commercial license from FORKTEX S.R.L. (info@forktex.com).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+[project]
+name = "forktex-fsd"
+version = "1.0.0"
+description = "A general-purpose software compliance standard: technology-agnostic atoms in tracks, bound per repository in fsd.toml, checked and run by one small tool."
+authors = [
+    {name = "FORKTEX",email = "info@forktex.com"}
+]
+readme = "README.md"
+# Dual-licensed: AGPL-3.0-or-later for OSS use; a proprietary commercial
+# license is also available (see LICENSE + NOTICE; info@forktex.com).
+license = "AGPL-3.0-or-later OR LicenseRef-ForkTex-Commercial"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.14,<4.0"
+keywords = ["compliance", "standard", "quality-gate", "delivery", "task-runner", "fsd"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
+]
+dependencies = [
+    "forktex>=1.2,<2",
+    "pydantic>=2.14",
+]
+
+[project.scripts]
+fsd = "forktex_fsd._cli:main"
+
+[project.urls]
+"Homepage" = "https://forktex.com"
+"Repository" = "https://github.com/forktex/forktex-fsd"
+"Documentation" = "https://github.com/forktex/forktex-fsd/tree/master/docs"
+"Changelog" = "https://github.com/forktex/forktex-fsd/blob/master/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/forktex/forktex-fsd/issues"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+packages = [{ include = "forktex_fsd", from = "src" }]
+include = [
+    { path = "CHANGELOG.md", format = "sdist" },
+    { path = "docs", format = "sdist" },
+    { path = "tests", format = "sdist" },
+    { path = "scripts", format = "sdist" },
+    { path = "fsd.toml", format = "sdist" },
+    { path = "AGENTS.md", format = "sdist" },
+    { path = "SECURITY.md", format = "sdist" },
+    { path = "poetry.lock", format = "sdist" },
+    { path = "poetry.toml", format = "sdist" },
+    { path = "src/forktex_fsd/py.typed", format = ["sdist", "wheel"] },
+    # Without the standard in the wheel, Standard.load() has nothing to load.
+    { path = "src/forktex_fsd/standard.toml", format = ["sdist", "wheel"] },
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2",
+    "pytest-cov>=7.1",
+    "ruff>=0.17.3",
+    "pyright>=1.1.414",
+    "pip-audit>=2.10.1",
+    "build>=1.6.1",
+    "twine>=7.0",
+    "import-linter>=2.1",
+    "testcontainers (>=4.15)",
+]
+
+[tool.ruff]
+# Matches requires-python: older targets misread PEP 758 and PEP 695 syntax.
+target-version = "py314"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "ANN"]
+
+[tool.ruff.lint.per-file-ignores]
+# `src/` has no exemptions; tests hold the baseline only.
+"tests/**" = ["E1", "E2", "E5", "I", "UP", "B", "SIM", "RUF", "ANN"]
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/__pycache__"]
+pythonVersion = "3.14"
+typeCheckingMode = "basic"
+
+[tool.coverage.report]
+# The floor compares the figure to two decimals; at 0, a rounded figure passes a floor it misses.
+precision = 2
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".venv", "dist", "build"]
+filterwarnings = [
+    # This package's own deprecations fail the suite; nothing else is silenced.
+    "error::DeprecationWarning:forktex_fsd",
+]
+
+[tool.importlinter]
+root_package = "forktex_fsd"
+
+[[tool.importlinter.contracts]]
+name = "The command line sits on top; the library never imports it"
+type = "layers"
+containers = ["forktex_fsd"]
+layers = [
+    "_cli",
+    "_render",
+    "project",
+    "report",
+    "check | run",
+    "binding | results",
+    "standard",
+    "errors | paths",
+]

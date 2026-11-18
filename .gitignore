@@ -1,0 +1,14 @@
+__pycache__/
+*.py[co]
+*.egg-info/
+.venv/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.idea/
+.import_linter_cache/
+fsd-report.json
+fsd-report.md

@@ -1,0 +1,18 @@
+ForkTex FSD
+Copyright (C) 2026 FORKTEX S.R.L.
+
+ForkTex FSD is a general-purpose software compliance standard and the tool
+that checks it: technology-agnostic atoms grouped into tracks, bound per
+repository in fsd.toml.
+
+This product is dual-licensed:
+
+  * GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later), or
+  * A proprietary commercial license from FORKTEX S.R.L.
+
+If you cannot meet the obligations of the AGPL -- including its network-use
+source-disclosure requirement -- you MUST obtain a commercial license before
+using this software. Contact info@forktex.com.
+
+Third-party components are distributed under their own licenses; see the
+dependency metadata in pyproject.toml.

@@ -1,0 +1,186 @@
+# Copyright (C) 2026 FORKTEX S.R.L.
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-ForkTex-Commercial
+#
+# This file is part of ForkTex FSD.
+#
+# For commercial licensing -- including use in proprietary products, SaaS
+# deployments, or any context where AGPL obligations cannot be met -- you
+# MUST obtain a commercial license from FORKTEX S.R.L. (info@forktex.com).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# The FSD standard: general, technology-agnostic contracts. A repository binds
+# them to its own commands in `fsd.toml`; nothing here names a tool.
+#
+# profile  — how the software reaches its user: "library" (consumed as a
+#            dependency), "application" (installed onto a machine or device),
+#            "service" (deployed to an environment and operated)
+# strength — per profile: "must", "should", or "na" (does not apply)
+# effect   — "read-only": inspects only · "local": changes the workspace or
+#            starts processes · "host": changes this machine beyond the
+#            workspace · "external": acts on the world beyond this machine
+# evidence — "command": bound to a command · "file": bound to files that must
+#            exist
+# checks   — a track whose atoms all check rather than act; it runs as a whole
+#            with `fsd <track>`, and only these tracks do
+
+version = "1.0.0"
+
+[tracks.operation]
+summary = "The software can be set up, run, observed, stopped and cleaned from a clean checkout."
+
+[tracks.assurance]
+summary = "The source conforms, is consistent, is licensed, and its tests pass."
+checks = true
+
+[tracks.security]
+summary = "What the software depends on carries no known weakness."
+checks = true
+
+[tracks.delivery]
+summary = "The software becomes an artifact and reaches the people or places that use it."
+
+[tracks.documentation]
+summary = "A newcomer, a person or an agent, can start from the repository alone."
+checks = true
+
+# -- operation ----------------------------------------------------------------
+
+[atoms.setup]
+track = "operation"
+contract = "Install everything needed to build and run the software, starting from a clean checkout."
+effect = "local"
+evidence = "command"
+strength = { library = "must", application = "must", service = "must" }
+
+[atoms.start]
+track = "operation"
+contract = "Run the software locally."
+effect = "local"
+evidence = "command"
+strength = { library = "na", application = "na", service = "must" }
+
+[atoms.stop]
+track = "operation"
+contract = "Tear down what start brought up."
+effect = "local"
+evidence = "command"
+strength = { library = "na", application = "na", service = "must" }
+
+[atoms.status]
+track = "operation"
+contract = "Report whether what start brought up is running, together with its recent output."
+effect = "read-only"
+evidence = "command"
+strength = { library = "na", application = "na", service = "must" }
+
+[atoms.clean]
+track = "operation"
+contract = "Remove everything the build and the run produced."
+effect = "local"
+evidence = "command"
+strength = { library = "should", application = "should", service = "should" }
+
+# -- assurance ----------------------------------------------------------------
+
+[atoms.format]
+track = "assurance"
+contract = "The source layout conforms to the project's style; the check fails without rewriting anything."
+effect = "read-only"
+evidence = "command"
+strength = { library = "must", application = "must", service = "must" }
+
+[atoms.lint]
+track = "assurance"
+contract = "Static analysis fails on defects and unsafe patterns, without executing the code."
+effect = "read-only"
+evidence = "command"
+strength = { library = "must", application = "must", service = "must" }
+
+[atoms.validate]
+track = "assurance"
+contract = "The source is statically shown to be internally consistent: types, schemas, configuration, interface specifications."
+effect = "read-only"
+evidence = "command"
+strength = { library = "should", application = "should", service = "should" }
+
+[atoms.test]
+track = "assurance"
+contract = "The software's own tests pass."
+effect = "local"
+evidence = "command"
+strength = { library = "must", application = "must", service = "must" }
+
+[atoms.license]
+track = "assurance"
+contract = "The licence is declared and applied to every source file."
+effect = "read-only"
+evidence = "command"
+strength = { library = "should", application = "should", service = "should" }
+
+# -- security -----------------------------------------------------------------
+
+[atoms.audit]
+track = "security"
+contract = "No dependency has a known vulnerability; the check fails when one does."
+effect = "read-only"
+evidence = "command"
+strength = { library = "must", application = "must", service = "must" }
+
+# -- delivery -----------------------------------------------------------------
+
+[atoms.build]
+track = "delivery"
+contract = "Turn the source into the deliverable artifact, with no effect outside the workspace."
+effect = "local"
+evidence = "command"
+strength = { library = "must", application = "must", service = "must" }
+
+[atoms.install]
+track = "delivery"
+contract = "Put the built artifact onto this machine, so that it can be used here."
+effect = "host"
+evidence = "command"
+strength = { library = "na", application = "must", service = "na" }
+
+[atoms.publish]
+track = "delivery"
+contract = "Put a versioned artifact where its consumers fetch it."
+effect = "external"
+evidence = "command"
+strength = { library = "must", application = "should", service = "should" }
+
+[atoms.deploy]
+track = "delivery"
+contract = "Put a version into a named environment where it runs."
+effect = "external"
+evidence = "command"
+strength = { library = "na", application = "na", service = "must" }
+
+[atoms.rollback]
+track = "delivery"
+contract = "Return an environment to the version it ran before."
+effect = "external"
+evidence = "command"
+strength = { library = "na", application = "na", service = "should" }
+
+# -- documentation ------------------------------------------------------------
+
+[atoms.manual]
+track = "documentation"
+contract = "A newcomer, a person or an agent, can start using and working on the software from the repository alone. The repository names the files that show it."
+effect = "read-only"
+evidence = "file"
+strength = { library = "must", application = "must", service = "must" }

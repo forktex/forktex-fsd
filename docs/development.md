@@ -98,6 +98,7 @@ poetry run fsd documentation  # the manual's files exist
 poetry run fsd build          # wheel + sdist, twine check, install-and-use smoke test
 poetry run fsd report         # run every routine atom; write fsd-report.json and .md
 poetry run fsd tidy           # rewrite formatting, fixable lint and licence headers
+poetry run fsd tag            # release-check, then tag HEAD v<version> and push the tag
 poetry run fsd publish        # release-check (clean tree, HEAD tagged v<version>), then upload
 ```
 
@@ -122,7 +123,10 @@ are held at 100, because every branch here is a rule of the standard.
 ## Releasing
 
 1. Move the `[Unreleased]` entries in `CHANGELOG.md` under the new version, dated.
-2. Set `version` in `pyproject.toml`; commit; tag the commit `v<version>`.
-3. `poetry run fsd assurance`, `fsd security`, `fsd documentation` and `fsd build`.
-4. `poetry run fsd publish`, which refuses a dirty tree, an untagged `HEAD`, a
+2. Set `version` in `pyproject.toml`.
+3. `poetry run fsd assurance`, `fsd security`, `fsd documentation` and `fsd build`;
+   commit.
+4. `poetry run fsd tag`: once every release check but the tag passes, it tags
+   `HEAD` `v<version>` and pushes the tag. Run again, it changes nothing.
+5. `poetry run fsd publish`, which refuses a dirty tree, an untagged `HEAD`, a
    missing changelog section or stale artefacts in `dist/`.

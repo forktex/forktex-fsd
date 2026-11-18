@@ -158,8 +158,8 @@ print(compliance.compliant, report.passed)
 
 | Page | For |
 |---|---|
-| [Guide](docs/guide.md) | Complete, copyable setups: a library, a service, any stack, custom atoms, CI, reports, Python |
-| [Reference](docs/reference.md) | The standard, `fsd.toml`, the commands, every public name and error |
+| [Guide](https://github.com/forktex/forktex-fsd/blob/master/docs/guide.md) | Complete, copyable setups: a library, a service, any stack, custom atoms, CI, reports, Python |
+| [Reference](https://github.com/forktex/forktex-fsd/blob/master/docs/reference.md) | The standard, `fsd.toml`, the commands, every public name and error |
 
 ## Versioning
 
@@ -172,15 +172,15 @@ Semantic versioning covers:
 `fsd.toml` names the standard version it was written for. `fsd` reads any file
 of its own major version up to its own minor, and refuses any other, so a
 change of standard is never silent. Changes are listed in the
-[CHANGELOG](CHANGELOG.md).
+[CHANGELOG](https://github.com/forktex/forktex-fsd/blob/master/CHANGELOG.md).
 
 ## Contributing
 
 Working on `forktex-fsd` itself? Start with
-[`docs/development.md`](docs/development.md). Security issues go to the address
-in [SECURITY.md](SECURITY.md).
+[`docs/development.md`](https://github.com/forktex/forktex-fsd/blob/master/docs/development.md). Security issues go to the address
+in [SECURITY.md](https://github.com/forktex/forktex-fsd/blob/master/SECURITY.md).
 
 ## Licence
 
 AGPL-3.0-or-later, or a commercial licence from FORKTEX S.R.L.
-(info@forktex.com). See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+(info@forktex.com). See [LICENSE](https://github.com/forktex/forktex-fsd/blob/master/LICENSE) and [NOTICE](https://github.com/forktex/forktex-fsd/blob/master/NOTICE).

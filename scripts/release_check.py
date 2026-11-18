@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import re
 import subprocess
+import sys
 import tomllib
 from pathlib import Path
 
@@ -72,18 +73,24 @@ def _git(*args: str) -> str:
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=False).stdout.strip()
 
 
-def _git_problems(version: str) -> list[str]:
+def _tagged(version: str) -> bool:
+    return f"v{version}" in _git("tag", "--points-at", "HEAD").split()
+
+
+def _git_problems(version: str, *, tagged: bool) -> list[str]:
     # What is uploaded must be what is committed and tagged: a release built from a
     # dirty tree cannot be rebuilt from the repository afterwards.
     problems: list[str] = []
     if _git("status", "--porcelain"):
         problems.append("the working tree has uncommitted changes — commit them before publishing")
-    if f"v{version}" not in _git("tag", "--points-at", "HEAD").split():
-        problems.append(f"HEAD is not tagged v{version} — tag the commit being published")
+    if tagged and not _tagged(version):
+        problems.append(f"HEAD is not tagged v{version} — run `fsd tag`")
+    if not tagged and not _tagged(version) and _git("tag", "--list", f"v{version}"):
+        problems.append(f"v{version} already tags another commit — raise the version")
     return problems
 
 
-def check() -> list[str]:
+def check(*, tagged: bool = True) -> list[str]:
     version = _declared_version()
     problems: list[str] = []
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
@@ -103,21 +110,41 @@ def check() -> list[str]:
         )
 
     problems.extend(_dist_problems(version))
-    problems.extend(_git_problems(version))
+    problems.extend(_git_problems(version, tagged=tagged))
 
     return problems
 
 
-def main() -> int:
-    problems = check()
-    if problems:
-        print("release-check FAILED:")
-        for problem in problems:
-            print(f"  - {problem}")
-        return 1
-    print(f"release-check OK: {_declared_version()} is declared, dated, described and built.")
+def _report(problems: list[str]) -> int:
+    print("release-check FAILED:")
+    for problem in problems:
+        print(f"  - {problem}")
+    return 1
+
+
+def tag() -> int:
+    version = _declared_version()
+    if problems := check(tagged=False):
+        return _report(problems)
+    name = f"v{version}"
+    if not _tagged(version):
+        subprocess.run(["git", "tag", "-a", name, "-m", f"forktex-fsd {version}"], cwd=ROOT, check=True)
+    pushed = subprocess.run(["git", "push", "origin", name], cwd=ROOT, check=False).returncode
+    if pushed:
+        print(f"tagged {name} locally; pushing it failed — run `git push origin {name}`")
+        return pushed
+    print(f"tagged and pushed {name}: `fsd publish` uploads it")
+    return 0
+
+
+def main(argv: list[str]) -> int:
+    if argv == ["tag"]:
+        return tag()
+    if problems := check():
+        return _report(problems)
+    print(f"release-check OK: {_declared_version()} is declared, dated, described, built and tagged.")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))
